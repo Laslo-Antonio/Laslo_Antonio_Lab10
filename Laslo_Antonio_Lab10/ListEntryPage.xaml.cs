@@ -11,36 +11,32 @@ using Laslo_Antonio_Lab10.Models;
 namespace Laslo_Antonio_Lab10
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class ListEntryPage : ContentPage
+    public partial class ListPage : ContentPage
     {
-
-        public ListEntryPage()
+        public ListPage()
         {
             InitializeComponent();
-
         }
-        protected override async void OnAppearing()
+        async void OnSaveButtonClicked(object sender, EventArgs e)
         {
-            base.OnAppearing();
-            listView.ItemsSource = await App.Database.GetShopListsAsync();
+            var slist = (ShopList)BindingContext;
+            slist.Date = DateTime.UtcNow;
+            await App.Database.SaveShopListAsync(slist);
+            await Navigation.PopAsync();
         }
-        async void OnShopListAddedClicked(object sender, EventArgs e)
+        async void OnDeleteButtonClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new ListPage
+            var slist = (ShopList)BindingContext;
+            await App.Database.DeleteShopListAsync(slist);
+            await Navigation.PopAsync();
+        }
+        async void OnChooseButtonClicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new ProductPage((ShopList)this.BindingContext)
             {
-                BindingContext = new ShopList()
+                BindingContext = new Product()
             });
-        }
-        async void OnListViewItemSelected(object sender, SelectedItemChangedEventArgs e)
-        {
-            if (e.SelectedItem != null)
-            {
-                await Navigation.PushAsync(new ListPage
-                {
-                    BindingContext = e.SelectedItem as ShopList
-                });
-            }
+
         }
     }
-
 }
